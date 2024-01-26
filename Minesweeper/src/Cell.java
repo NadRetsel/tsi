@@ -9,7 +9,7 @@ public class Cell {
 
         this.is_bomb        = false;
         this.is_flagged     = false;
-        this.is_revealed    = true;
+        this.is_revealed    = false;
         this.bombs_near     = 0;
     }
     public int GetX(){

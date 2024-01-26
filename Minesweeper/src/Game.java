@@ -1,32 +1,75 @@
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.Scanner;
 
 public class Game {
-
+    private Scanner reader = new Scanner(System.in);
     private Grid grid;
     private int number_of_bombs;
     private int rows, columns;
 
     public Game(){
-        this.rows = 10;
-        this.columns = 5;
+        this.rows = 8;
+        this.columns = 16;
         this.grid = new Grid(this.rows,this.columns);
         System.out.println(this.grid.PrintGrid());
 
-        this.number_of_bombs = this.rows * this.columns - 9;
+        this.number_of_bombs = (int) (this.rows * this.columns * 0.25);
 
         PlayGame();
     }
 
+    // TODO User select grid or custom
+    // TODO User select difficulty or custom
+    // TODO Check if num of bombs < num of possible cells
+    public void SetupGame(){
+
+    }
     public void PlayGame(){
+
         // TODO User selects cells
         // TODO Custom grid sizes and bombs
-        // TODO Check if num of bombs < num of possible cells
+
         // TODO Flagging
-        PopulateGrid(4,5);
-        System.out.println(this.grid.PrintGrid());
-        UpdateGrid(4,5);
-        System.out.println(this.grid.PrintGrid());
+
+
+
+        boolean game_in_progress = true;
+        boolean first_move = true;
+        String[] menu_options = {"SELECT", "FLAG/UNLFAG", "MARK/UNMARK"};
+
+        do{
+            
+            String menu_select = menu_options[InputIntegerRange("Would you like to... +" +
+                    "\n1 - SELECT to reveal" +
+                    "\n2 - FLAG/UNFLAG to indicate bomb" +
+                    "\n3 - MARK/UNMARK to place a question mark"+
+                    "Please select [1-3]",
+                    1, 3)];
+            // TODO Confirm user input
+
+            int input_x = InputIntegerRange("Enter your x-coordinate: ", 1, this.columns) - 1;
+            int input_y = InputIntegerRange("Enter your y-coordinate: ", 1, this.rows) - 1;
+
+            switch(menu_select){
+                case "SELECT" -> {
+
+                    // TODO Confirm inputs with user
+
+                    // Only populate with bombs after the first move
+                    if(first_move){
+                        PopulateGrid(input_x,input_y);
+                        first_move = false;
+                    }
+
+                    UpdateGrid(input_x,input_y);
+                    System.out.println(this.grid.PrintGrid());
+                }
+            }
+
+
+        } while(game_in_progress);
+
 
     }
 
@@ -80,8 +123,11 @@ public class Game {
         }
     }
 
+    // Update grid after user selects a cell
     public void UpdateGrid(int selected_x, int selected_y){
         Cell cell_selected = this.grid.GetCell(selected_x, selected_y);
+
+        // TODO If selected square already revealed -> ask again
 
         // TODO If selected square = flagged -> confirm with user
 
@@ -94,4 +140,53 @@ public class Game {
         if(cell_selected.GetBombsNear() >= 0) this.grid.RevealAdjacentCells(selected_x, selected_y);
 
     }
+
+
+
+
+
+    // Validate inputs to be a integer
+    public int InputInteger(String input_message){
+        int int_input = -1;
+        boolean valid_input = false;
+
+        // Keep asking until valid input given
+        while(!valid_input){
+            System.out.println(input_message);
+            String input = this.reader.next();
+
+            // Check input is POSITIVE INTEGER
+            try {
+                int_input = Integer.parseInt(input);
+                if (int_input <= 0) throw new NegativeException();
+
+                valid_input = true;
+            }
+            catch(NegativeException e){
+                System.out.println("Input must be positive. Please try again.");
+            }
+            catch(Exception e) {
+                System.out.println("Input must be an integer. Please try again.");
+            }
+
+        }
+
+        return int_input;
+    }
+
+    // Validate inputs to be within integer range
+    public int InputIntegerRange(String input_message, int min, int max){
+        int int_input = -1;
+
+        do {
+            // Keep asking until input within range given
+            int_input = InputInteger(input_message); // Ensure integer is inputted
+            if(min <= int_input && int_input <= max) break;
+
+            System.out.println("Input out of range. Please try again.");
+        } while(true);
+
+        return int_input;
+    }
+
 }

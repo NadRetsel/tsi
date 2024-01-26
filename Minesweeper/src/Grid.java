@@ -44,7 +44,7 @@ public class Grid {
                  grid_string += !c.GetIsRevealed() // If cell hidden -> default. Otherwise, show
                          ? "[ ]"
                          : c.GetIsBomb() // If bomb -> bomb. Otherwise, safe
-                            ? "[*]"
+                            ? " * "
                             :  c.GetBombsNear() == 0
                                 ? " - "
                                 : " " + c.GetBombsNear() + " ";
@@ -58,7 +58,7 @@ public class Grid {
          }
 
          // Column labels
-         String x_label = " ";
+         String x_label = " " + " ";
          for(int i = 0; i < String.valueOf(this.rows).length(); i++)  x_label += " ";
 
          // Padding
@@ -84,7 +84,7 @@ public class Grid {
                  if(adjacent_x < 0 || adjacent_x >= this.columns) continue; // Don't check outside-of-grid
 
                  for(int adjacent_y = y-1; adjacent_y <= y+1; adjacent_y++){
-                     if(adjacent_y < 0 || adjacent_y >= this.rows || (adjacent_y == x && adjacent_y == y)) continue; // Don't check outside-of-grid OR same cell
+                     if(adjacent_y < 0 || adjacent_y >= this.rows || (adjacent_x == x && adjacent_y == y)) continue; // Don't check outside-of-grid OR same cell
 
                      if(this.grid_of_cells[adjacent_x][adjacent_y].GetIsRevealed()) continue; // Don't check if already revealed
                      RevealAdjacentCells(adjacent_x, adjacent_y);
