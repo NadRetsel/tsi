@@ -8,7 +8,7 @@ public class Grid {
 
          this.grid_of_cells = CreateGrid();
      }
-    public Cell GetCell(int x, int y){
+     public Cell GetCell(int x, int y){
          return this.grid_of_cells[x][y];
      }
 
@@ -19,39 +19,54 @@ public class Grid {
 
          for(int x = 0; x < this.columns; x++){
              Cell[] cells_column = new Cell[this.rows]; // Create empty column with height of number of rows
-             for(int i = 0; i < cells_column.length; i++) cells_column[i] = new Cell(); // Populate each column with empty Cells
-             grid[x] = cells_column; // Add populated column
+             for(int y = 0; y < this.rows; y++){
+                 grid[x][y] = new Cell(x,y); // Add populated column
+             }
          }
          return grid;
      }
 
      // Build the string ASCII art of the grid, including a rows and columns label
-    // TODO Reformat so the columns are always aligned with the labels
      public String PrintGrid(){
          String grid_string = "";
-         for(int y = 0; y < this.rows; y++){
-             grid_string += (y+1); // Row labels
 
-             for (Cell[] cells_column : this.grid_of_cells) {
-                 Cell c = cells_column[y];
+
+         for(int y = 0; y < this.rows; y++){
+
+             // Row labels
+             String y_label_padding = " ";
+             for(int i = 0; i < String.valueOf(this.rows).length() - String.valueOf(y+1).length(); i++)  y_label_padding += " "; // Padding to keep label algined
+             grid_string += (y+1) + y_label_padding;
+
+             for (int x = 0; x < this.columns; x++) {
+                 Cell c = this.grid_of_cells[x][y];
                  // TODO Flagging character
-                 // todo Reformat this statement to be more legible
-                 grid_string += c.GetIsRevealed() // If cell revealed -> Show. Otherwise, default character
-                         ? c.GetIsBomb() // If bomb -> bomb. Otherwise, safe
-                            ? " B "
-                            : c.GetBombsNear() == 0 // If 0 -> empty. Otherwise, number
-                                ? "- -"
-                                : " " + c.GetBombsNear() + " "
-                         : "[ ]";
-                 grid_string += " ";
+                 grid_string += !c.GetIsRevealed() // If cell hidden -> default. Otherwise, show
+                         ? "[ ]"
+                         : c.GetIsBomb() // If bomb -> bomb. Otherwise, safe
+                            ? "[*]"
+                            :  c.GetBombsNear() == 0
+                                ? " - "
+                                : " " + c.GetBombsNear() + " ";
+
+                 // Column padding to keep aligned based on largest column label
+                 String column_padding = "";
+                 for(int i = 0; i < String.valueOf(this.columns).length(); i++)  column_padding += " ";
+                 grid_string += column_padding;
              }
              grid_string += "\n";
          }
 
          // Column labels
          String x_label = " ";
-         for(int x = 0; x < this.columns; x++) x_label += " " + (x+1) + " " + "\t";
-         grid_string =  x_label + "\n" + grid_string;
+         for(int i = 0; i < String.valueOf(this.rows).length(); i++)  x_label += " ";
+
+         // Padding
+         for(int x = 0; x < this.columns; x++){
+             x_label += (x+1);
+             for(int i = 0; i < 3 + String.valueOf(this.columns).length() - String.valueOf(x+1).length(); i++)  x_label += " ";
+         }
+         grid_string =  x_label + "\n" + grid_string; // Add column x labels to the string
 
          return grid_string;
      }

@@ -1,14 +1,22 @@
 public class Cell {
 
     private boolean is_bomb, is_flagged, is_revealed;
-    private int bombs_near;
+    private int bombs_near, x,y;
 
-    public Cell(){
+    public Cell(int x, int y){
+        this.x              = x;
+        this.y              = y;
+
         this.is_bomb        = false;
         this.is_flagged     = false;
-        this.is_revealed    = false;
+        this.is_revealed    = true;
         this.bombs_near     = 0;
-
+    }
+    public int GetX(){
+        return this.x;
+    }
+    public int GetY(){
+        return this.y;
     }
     public boolean GetIsBomb(){
         return this.is_bomb;
