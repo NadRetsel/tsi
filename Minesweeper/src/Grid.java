@@ -27,7 +27,7 @@ public class Grid {
      }
 
      // Build the string ASCII art of the grid, including a rows and columns label
-     public String PrintGrid(){
+     public String GridString(){
          String grid_string = "";
 
 
@@ -40,7 +40,7 @@ public class Grid {
 
              for (int x = 0; x < this.columns; x++) {
                  Cell c = this.grid_of_cells[x][y];
-                 // TODO Flagging character
+
                  grid_string += c.GetIsRevealed() // If cell revealed -> Show number or bomb / Otherwise -> Flagged, marked, empty
                          ? c.GetIsBomb()
                             ? " * "
@@ -77,22 +77,25 @@ public class Grid {
 
 
 
-     public void RevealAdjacentCells(int x, int y){
-        Cell current_cell = this.grid_of_cells[x][y];
-        // Reveal current cell
+     public void RevealAdjacentCells(Cell current_cell){
+
+         // Reveal current cell
          if(current_cell.GetBombsNear() >= 0) current_cell.SetIsRevealed(true);
+
+         int current_x = current_cell.GetX();
+         int current_y = current_cell.GetY();
 
          //  Recursively reveal adjacent cells
          if(current_cell.GetBombsNear() == 0){
-             for(int adjacent_x = x-1; adjacent_x <= x+1; adjacent_x++){
+             for(int adjacent_x = current_x-1; adjacent_x <= current_x+1; adjacent_x++){
                  if(adjacent_x < 0 || adjacent_x >= this.columns) continue; // Don't check outside-of-grid
 
-                 for(int adjacent_y = y-1; adjacent_y <= y+1; adjacent_y++){
-                     if(adjacent_y < 0 || adjacent_y >= this.rows || (adjacent_x == x && adjacent_y == y)) continue; // Don't check outside-of-grid OR same cell
+                 for(int adjacent_y = current_y-1; adjacent_y <= current_y+1; adjacent_y++){
+                     if(adjacent_y < 0 || adjacent_y >= this.rows || (adjacent_x == current_x && adjacent_y == current_y)) continue; // Don't check outside-of-grid OR same cell
 
                      Cell adjacent_cell = this.grid_of_cells[adjacent_x][adjacent_y];
                      if(adjacent_cell.GetIsRevealed() || adjacent_cell.GetIsFlagged() || adjacent_cell.GetIsMarked()) continue; // Don't check if already revealed, flagged, or marked
-                     RevealAdjacentCells(adjacent_x, adjacent_y);
+                     RevealAdjacentCells(adjacent_cell);
                  }
              }
          }
