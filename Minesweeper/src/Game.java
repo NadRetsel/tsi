@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Scanner;
@@ -5,16 +6,21 @@ import java.util.Scanner;
 public class Game {
     private Scanner reader = new Scanner(System.in);
     private Grid grid;
-    private int number_of_bombs;
-    private int rows, columns;
+    private int rows, columns, number_of_bombs, flag_count, mark_count;
+    private boolean first_move;
 
     public Game(){
         this.rows = 8;
         this.columns = 16;
         this.grid = new Grid(this.rows,this.columns);
-        System.out.println(this.grid.PrintGrid());
+        this.first_move = true;
 
         this.number_of_bombs = (int) (this.rows * this.columns * 0.25);
+        this.flag_count = 0;
+        this.mark_count = 0;
+
+        System.out.println(this.grid.PrintGrid());
+
 
         PlayGame();
     }
@@ -35,37 +41,49 @@ public class Game {
 
 
         boolean game_in_progress = true;
-        boolean first_move = true;
-        String[] menu_options = {"SELECT", "FLAG/UNLFAG", "MARK/UNMARK"};
-
+        String[] menu_options = {"SELECT", "FLAG/UNFLAG", "MARK/UNMARK"};
         do{
-            
-            String menu_select = menu_options[InputIntegerRange("Would you like to... +" +
-                    "\n1 - SELECT to reveal" +
-                    "\n2 - FLAG/UNFLAG to indicate bomb" +
-                    "\n3 - MARK/UNMARK to place a question mark"+
-                    "Please select [1-3]",
-                    1, 3)];
-            // TODO Confirm user input
 
-            int input_x = InputIntegerRange("Enter your x-coordinate: ", 1, this.columns) - 1;
-            int input_y = InputIntegerRange("Enter your y-coordinate: ", 1, this.rows) - 1;
+            // Menu select
+            String menu_select = "";
+            boolean menu_confirm = false;
+            while(!menu_confirm) {
+                menu_select = menu_options[InputIntegerRange("Would you like to..." +
+                                "\n0 - SELECT to reveal" +
+                                "\n1 - FLAG/UNFLAG to indicate bomb" +
+                                "\n2 - MARK/UNMARK to place a question mark" +
+                                "\nPlease select [0-2]",
+                        0, 2)];
+                // TODO Confirm user input
+                String[] options = {"Y", "N"};
+                String confirm_input = InputMenu(("You have chosen to " + menu_select + ". Is this correct? [Y/N]"), options);
 
-            switch(menu_select){
-                case "SELECT" -> {
-
-                    // TODO Confirm inputs with user
-
-                    // Only populate with bombs after the first move
-                    if(first_move){
-                        PopulateGrid(input_x,input_y);
-                        first_move = false;
-                    }
-
-                    UpdateGrid(input_x,input_y);
-                    System.out.println(this.grid.PrintGrid());
-                }
+                if(confirm_input.equals("Y")) menu_confirm = true;
             }
+
+            // Coord cell select
+            int input_x = -1;
+            int input_y = -1;
+            boolean coord_confirm = false;
+            while(!coord_confirm) {
+                input_x = InputIntegerRange("Enter your x-coordinate: ", 1, this.columns) - 1;
+                input_y = InputIntegerRange("Enter your y-coordinate: ", 1, this.rows) - 1;
+
+                String[] options = {"Y", "N"};
+                String confirm_input = InputMenu(("You have chosen (" + (input_x+1) + "," + (input_y+1) +"). Is this correct? [Y/N]"), options);
+
+                if(confirm_input.equals("Y")) coord_confirm = true;
+            }
+
+            System.out.println(menu_select);
+            switch(menu_select){
+                case "SELECT" ->  SelectCell(input_x,input_y);
+                case "FLAG/UNFLAG" -> FlagCell(input_x, input_y, this.grid.GetCell(input_x, input_y));
+                case "MARK/UNMARK" -> MarkCell(input_x, input_y);
+
+            }
+
+            System.out.println(this.grid.PrintGrid());
 
 
         } while(game_in_progress);
@@ -124,21 +142,102 @@ public class Game {
     }
 
     // Update grid after user selects a cell
-    public void UpdateGrid(int selected_x, int selected_y){
-        Cell cell_selected = this.grid.GetCell(selected_x, selected_y);
+    public void SelectCell(int input_x, int input_y){
 
-        // TODO If selected square already revealed -> ask again
+        // Populate grid with bombs if on first move
+        if(this.first_move){
+            PopulateGrid(input_x, input_y);
+            this.first_move = false;
+        }
 
-        // TODO If selected square = flagged -> confirm with user
+        Cell cell_selected = this.grid.GetCell(input_x, input_y);
+
+        // Cell is already revealed -> Do nothing
+        if(cell_selected.GetIsRevealed()){
+            System.out.println("Already revealed.");
+            return;
+        }
+
+        // Cell is already flagged -> Do nothing
+        if(cell_selected.GetIsFlagged()){
+            System.out.println("Cannot reveal. Cell is flagged.");
+            return;
+        }
+
+        // Cell is already marked -> Do nothing
+        if(cell_selected.GetIsMarked()){
+            System.out.println("Cannot reveal. Cell is marked.");
+            return;
+        }
 
         // TODO If selected square = bomb -> end game
         if(cell_selected.GetIsBomb()){
             // TODO END GAME
+            System.out.println("Bomb exploded. GAME OVER.");
+            return;
+
         }
 
         // Reveal selected and adjacent cells if not bomb or flagged
-        if(cell_selected.GetBombsNear() >= 0) this.grid.RevealAdjacentCells(selected_x, selected_y);
+        if(cell_selected.GetBombsNear() >= 0) this.grid.RevealAdjacentCells(input_x, input_y);
 
+    }
+    public void FlagCell(int input_x, int input_y, Cell cell_selected){
+
+        //Cell cell_selected = this.grid.GetCell(input_x, input_y);
+
+        // Cell is already revealed -> Do nothing
+        if(cell_selected.GetIsRevealed()){
+            System.out.println("Cannot flag cell. Already revealed.");
+            return;
+        }
+
+        // Cell is already flagged -> Unflag
+        if(cell_selected.GetIsFlagged()){
+            System.out.println("Unflagging cell.");
+            cell_selected.SetIsFlagged(false);
+            this.flag_count -= 1;
+            return;
+        }
+
+        // Cell is not yet flagged -> Check if maximum flags -> Flag and unmark if needed
+        if(!cell_selected.GetIsFlagged()){
+            if(this.flag_count >= this.number_of_bombs){
+                System.out.println("Cannot flag cell. Maximum number of flags reached. Unflag another flagged cell first.");
+                return;
+            }
+
+            System.out.println("Flagging cell.");
+            cell_selected.SetIsFlagged(true);
+            cell_selected.SetIsMarked(false);
+            this.flag_count += 1;
+            return;
+        }
+    }
+    public void MarkCell(int input_x, int input_y){
+        Cell cell_selected = this.grid.GetCell(input_x, input_y);
+
+        // Cell is already revealed -> Do nothing
+        if(cell_selected.GetIsRevealed()){
+            System.out.println("Cannot mark cell. Already revealed.");
+            return;
+        }
+
+        // Cell is already marked -> Unmark
+        if(cell_selected.GetIsMarked()){
+            System.out.println("Unmarking cell.");
+            cell_selected.SetIsMarked(false);
+            return;
+        }
+
+        // Cell is not yet marked -> Mark and automtically unflag
+        if(!cell_selected.GetIsMarked()){
+            System.out.println("Marking cell.");
+            cell_selected.SetIsMarked(true);
+            cell_selected.SetIsFlagged(false);
+            this.flag_count -= 1;
+            return;
+        }
     }
 
 
@@ -158,13 +257,13 @@ public class Game {
             // Check input is POSITIVE INTEGER
             try {
                 int_input = Integer.parseInt(input);
-                if (int_input <= 0) throw new NegativeException();
+                //if (int_input <= 0) throw new NegativeException();
 
                 valid_input = true;
             }
-            catch(NegativeException e){
-                System.out.println("Input must be positive. Please try again.");
-            }
+            //catch(NegativeException e){
+            //    System.out.println("Input must be positive. Please try again.");
+            //}
             catch(Exception e) {
                 System.out.println("Input must be an integer. Please try again.");
             }
@@ -187,6 +286,20 @@ public class Game {
         } while(true);
 
         return int_input;
+    }
+
+    public String InputMenu(String input_message, String[] options){
+        String options_input = "";
+
+        do {
+            System.out.println(input_message);
+            options_input = reader.next().toUpperCase();
+            if(Arrays.asList(options).contains(options_input)) break;
+
+            System.out.println("Input not recognised. Please try again.");
+        } while(true);
+
+        return options_input;
     }
 
 }
