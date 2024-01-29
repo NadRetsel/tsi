@@ -1,7 +1,8 @@
 public class Cell {
+    private final int x, y;
 
     private boolean is_bomb, is_flagged, is_marked, is_revealed;
-    private final int bombs_near, x,y;
+    private int bombs_near;
 
     public Cell(int x, int y){
         this.x              = x;

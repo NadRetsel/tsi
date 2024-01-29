@@ -1,7 +1,8 @@
 public class Grid {
      private final int rows, columns;
-     private int cells_remaining;
      private final Cell[][] grid_of_cells;
+
+     private int cells_remaining;
 
      public Grid(int rows, int columns){
          this.rows = rows;
