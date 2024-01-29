@@ -5,16 +5,15 @@ import java.util.LinkedList;
 import java.util.Random;
 
 public class Game implements ActionListener, ItemListener {
+    private final JFrame frame;
+    private final JPanel panel_game, panel_game_grid;
     private final InputHandler input_handler = new InputHandler();
+    private final String[] action_options = {"Reveal", "Flag / Unflag", "Mark / Unmark"};
     private final Grid grid;
     private final LinkedList<Cell> cells_flagged;
     private final int rows, columns, number_of_bombs;
     private boolean first_move, game_in_progress;
     private String action_selected;
-    private JFrame frame;
-    private JPanel game_panel;
-    private JPanel grid_panel;
-    private final String[] action_options = {"Reveal", "Flag / Unflag", "Mark / Unmark"};
 
     public Game(int rows, int columns, int number_of_bombs){
         this.rows = rows;
@@ -28,111 +27,96 @@ public class Game implements ActionListener, ItemListener {
 
         this.action_selected = "Reveal";
 
+        this.frame = new JFrame();
+        this.panel_game = new JPanel();
+        this.panel_game_grid = new JPanel();
+
         CreateGame();
     }
 
     public void CreateGame(){
-        this.frame = new JFrame();
-        this.game_panel = new JPanel();
+        this.panel_game.setLayout(new BoxLayout(this.panel_game, BoxLayout.Y_AXIS));
+        this.panel_game_grid.setLayout(new GridLayout(this.rows, this.columns));
 
-        this.grid_panel = new JPanel();
-        grid_panel.setLayout(new GridLayout(this.rows, this.columns));
-
+        // Create grid of buttons
         for(int y = 0; y < this.rows; y++){
             for(int x = 0; x < this.columns; x++){
                 CellButton button = new CellButton("Cell", null, this.grid.GetCell(x,y));
                 button.addActionListener(this);
-                grid_panel.add(button);
+                this.panel_game_grid.add(button);
             }
         }
 
+        // Radio buttons to select REVEAL, FLAG, MARK
         JPanel action_panel = new JPanel();
         ButtonGroup action_group = new ButtonGroup();
-        JRadioButton action_select = new JRadioButton(action_options[0], true);
+
+        JRadioButton action_select = new JRadioButton(this.action_options[0], true);
         action_select.addItemListener(this);
         action_group.add(action_select);
         action_panel.add(action_select);
 
-        action_select = new JRadioButton(action_options[1], false);
+        action_select = new JRadioButton(this.action_options[1], false);
         action_select.addItemListener(this);
         action_group.add(action_select);
         action_panel.add(action_select);
 
-        action_select = new JRadioButton(action_options[2], false);
+        action_select = new JRadioButton(this.action_options[2], false);
         action_select.addItemListener(this);
         action_group.add(action_select);
         action_panel.add(action_select);
 
-        this.game_panel.add(action_panel);
-        this.game_panel.add(grid_panel);
 
-        this.frame.add(game_panel);
+        this.panel_game.add(action_panel);
+        this.panel_game.add(this.panel_game_grid);
+
+        this.frame.add(this.panel_game);
 
         this.frame.pack();
         this.frame.setVisible(true);
     }
-    public void EndGame(){
 
-        this.game_panel.remove(this.grid_panel);
-        this.grid_panel = new JPanel();
-        this.grid_panel.setLayout(new GridLayout(this.rows, this.columns));
-
-        for(int y = 0; y < this.rows; y++){
-            for(int x = 0; x < this.columns; x++){
-                Cell cell = this.grid.GetCell(x,y);
-                if(!cell.GetIsRevealed()){
-                    CellButton button = new CellButton("Cell", cell.GetLabel(), cell);
-                    if(cell.GetIsFlagged()) button.setForeground(Color.GREEN);
-                    if(cell.GetIsMarked()) button.setForeground(Color.MAGENTA);
-
-                    if(cell.GetIsBomb()) button.setText("X");
-
-                    button.addActionListener(this);
-                    this.grid_panel.add(button);
-
-                }
-                else{
-                    JLabel label = new JLabel();
-                    label.setText(cell.GetIsBomb() ? "X" : cell.GetLabel());
-                    label.setHorizontalAlignment(SwingConstants.CENTER);
-
-                    this.grid_panel.add(label);
-                }
-            }
-        }
-        this.game_panel.add(this.grid_panel);
-        this.frame.setVisible(true);
-
+    public void QuitGame(){
+        this.frame.dispatchEvent(new WindowEvent(this.frame, WindowEvent.WINDOW_CLOSING));
     }
 
     public void UpdateGrid(){
-        this.game_panel.remove(this.grid_panel);
-        this.grid_panel = new JPanel();
-        this.grid_panel.setLayout(new GridLayout(this.rows, this.columns));
+
+        // Add button to quit/close the game when end
+        if(!this.game_in_progress){
+            JButton quit_game = new JButton("Quit Game");
+            quit_game.addActionListener(this);
+            this.panel_game.add(quit_game, 0);
+        }
+
+        // Rebuild grid
+        this.panel_game_grid.removeAll();
 
         for(int y = 0; y < this.rows; y++){
             for(int x = 0; x < this.columns; x++){
                 Cell cell = this.grid.GetCell(x,y);
-                if(!cell.GetIsRevealed()){
+                if(!cell.GetIsRevealed()){ // Not yet selected -> Button
                     CellButton button = new CellButton("Cell", cell.GetLabel(), cell);
-                    if(cell.GetIsFlagged()) button.setForeground(Color.GREEN);
-                    if(cell.GetIsMarked()) button.setForeground(Color.MAGENTA);
-                    button.addActionListener(this);
-                    this.grid_panel.add(button);
+
+                    if(cell.GetIsFlagged()) button.setForeground(Color.GREEN); // Flag = Green
+                    else if(cell.GetIsMarked()) button.setForeground(Color.MAGENTA); // Mark = Magenta
+
+                    if(cell.GetIsBomb() && !this.game_in_progress) button.setText("X"); // Show bombs when game ends
+
+                    if(this.game_in_progress) button.addActionListener(this); // Only enable buttons during game
+                    this.panel_game_grid.add(button);
 
                 }
-                else{
+                else{ // Revealed -> Label
                     JLabel label = new JLabel();
                     label.setText(cell.GetIsBomb() ? "X" : cell.GetLabel());
                     label.setHorizontalAlignment(SwingConstants.CENTER);
 
-                    this.grid_panel.add(label);
+                    this.panel_game_grid.add(label);
                 }
             }
         }
         System.out.println("Updating");
-        this.game_panel.add(this.grid_panel);
-        this.frame.setVisible(true);
     }
 
     @Override
@@ -147,19 +131,15 @@ public class Game implements ActionListener, ItemListener {
                 else if(this.action_selected.equals(this.action_options[2])) MarkCell(cell_selected);
                 else System.out.println("Should not be here... CELL SELECT");
 
-                if(this.game_in_progress) UpdateGrid();
-                else EndGame();
-
+                UpdateGrid();
             }
-            case "End game" -> {
-
-            }
+            case "Quit Game" -> QuitGame();
         }
     }
     @Override
     public void itemStateChanged(ItemEvent e) {
         JRadioButton radio_button = (JRadioButton) e.getItem();
-        if(radio_button.isSelected()) this.action_selected = radio_button.getText();
+        if(radio_button.isSelected()) this.action_selected = radio_button.getText(); // Change variable to currently selected
     }
 
     public void PlayGame(){
@@ -270,6 +250,7 @@ public class Game implements ActionListener, ItemListener {
             this.grid.RevealAdjacentCells(cell_selected);
             System.out.println("Bomb exploded. GAME OVER.");
             this.game_in_progress = false;
+            JOptionPane.showMessageDialog(null, "Bomb exploded. GAME OVER");
             return;
         }
 
@@ -281,6 +262,7 @@ public class Game implements ActionListener, ItemListener {
             if(this.grid.GetCellsRemaining() == this.number_of_bombs){
                 System.out.println("Ending game. ALL BOMBS FOUND.");
                 this.game_in_progress = false;
+                JOptionPane.showMessageDialog(null, "All bombs found. GAME OVER");
             }
             return;
         }
