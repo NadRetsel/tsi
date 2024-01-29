@@ -57,7 +57,7 @@ public class Setup extends JFrame implements ActionListener {
 
     // Let the user select a grid to play
     public void SetupGame(){
-        JLabel label = new JLabel("===== WELCOME TO MINESWEEPER =====\n");
+        JLabel label = new JLabel("===== WELCOME TO MINESWEEPER =====");
         this.panel.add(label);
 
         JButton button = new JButton(this.grid_options[0]); // Easy

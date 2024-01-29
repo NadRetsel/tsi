@@ -7,6 +7,7 @@ import java.util.Random;
 public class Game implements ActionListener, ItemListener {
     private final JFrame frame;
     private final JPanel panel_game, panel_game_grid;
+    private final JLabel flag_count_label;
     private final InputHandler input_handler = new InputHandler();
     private final String[] action_options = {"Reveal", "Flag / Unflag", "Mark / Unmark"};
     private final Grid grid;
@@ -30,6 +31,7 @@ public class Game implements ActionListener, ItemListener {
         this.frame = new JFrame();
         this.panel_game = new JPanel();
         this.panel_game_grid = new JPanel();
+        this.flag_count_label = new JLabel(" ");
 
         CreateGame();
     }
@@ -67,7 +69,10 @@ public class Game implements ActionListener, ItemListener {
         action_panel.add(action_select);
 
 
+        this.flag_count_label.setText("0 / " + this.number_of_bombs + " flags used.");
+
         this.panel_game.add(action_panel);
+        this.panel_game.add(flag_count_label);
         this.panel_game.add(this.panel_game_grid);
 
         this.frame.add(this.panel_game);
@@ -81,6 +86,7 @@ public class Game implements ActionListener, ItemListener {
     }
 
     public void UpdateGrid(){
+        this.flag_count_label.setText(this.cells_flagged.size() + " / " + this.number_of_bombs + " flags used.");
 
         // Add button to quit/close the game when end
         if(!this.game_in_progress){
@@ -116,6 +122,7 @@ public class Game implements ActionListener, ItemListener {
                 }
             }
         }
+        this.frame.setVisible(true);
         System.out.println("Updating");
     }
 
@@ -135,6 +142,7 @@ public class Game implements ActionListener, ItemListener {
             }
             case "Quit Game" -> QuitGame();
         }
+
     }
     @Override
     public void itemStateChanged(ItemEvent e) {
