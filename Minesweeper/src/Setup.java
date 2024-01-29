@@ -4,7 +4,7 @@ import javax.swing.*;
 public class Setup extends JFrame implements ActionListener {
 
     private final InputHandler input_handler = new InputHandler();
-    private JFrame frame;
+    private final JFrame frame;
 
 
     public Setup(){
