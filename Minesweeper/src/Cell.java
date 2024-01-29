@@ -1,7 +1,7 @@
 public class Cell {
 
     private boolean is_bomb, is_flagged, is_marked, is_revealed;
-    private int bombs_near, x,y;
+    private final int bombs_near, x,y;
 
     public Cell(int x, int y){
         this.x              = x;
@@ -51,7 +51,7 @@ public class Cell {
         this.is_marked = is_marked;
     }
     public void IncrementBombsNear(){
-        this.bombs_near += 1;
+        ++this.bombs_near;
     }
 
 
