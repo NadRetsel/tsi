@@ -39,9 +39,6 @@ public class Cell {
     public void SetIsBomb(boolean is_bomb){
         this.is_bomb = is_bomb;
     }
-    public void SetBombsNear(int bombs_near){
-        this.bombs_near = bombs_near;
-    }
     public void SetIsRevealed(boolean is_revealed){
         this.is_revealed = is_revealed;
     }
