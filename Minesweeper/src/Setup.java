@@ -1,32 +1,75 @@
-public class Setup {
+import java.awt.event.*;
+import javax.swing.*;
+
+public class Setup extends JFrame implements ActionListener {
 
     private final InputHandler input_handler = new InputHandler();
+    private JFrame frame;
+
+
+    public Setup(){
+        this.frame = new JFrame();
+
+        SetupGame();
+
+    }
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String difficulty = e.getActionCommand();
+        switch(difficulty){
+            case "Easy" -> new Game(8,8,10);
+            case "Medium" ->  new Game(16,16, 40);
+            case "Hard" -> new Game(16, 30, 99);
+
+        }
+    }
+
 
     // Let the user select a grid to play
     public void SetupGame(){
-        while(true) {
+        JPanel panel = new JPanel();
+        JLabel label = new JLabel("===== WELCOME TO MINESWEEPER =====");
+        panel.add(label);
 
-            System.out.println("===== WELCOME TO MINESWEEPER =====");
-            String[] grid_options = {"EASY", "MEDIUM", "HARD", "CUSTOM"};
-            int grid_input = SelectGrid(grid_options);
+        JButton button = new JButton("Easy");
+        button.addActionListener(this);
+        panel.add(button);
 
-            Game game = null;
-            switch (grid_input) {
-                case 0 -> game = new Game(8, 8, 10); // EASY
-                case 1 -> game = new Game(16, 16, 40); // MEDIUM
-                case 2 -> game = new Game(16, 30, 99); // HARD
-                case 3 -> { // CUSTOM
-                    int custom_rows = input_handler.InputInteger("Enter number of rows (minimum of 1): ", 1, null);
-                    int custom_columns = input_handler.InputInteger("Enter number of columns (minimum of " + (custom_rows == 1 ? 2 : 1) + "): ", (custom_rows == 1 ? 2 : 1), null);
+        button = new JButton("Medium");
+        button.addActionListener(this);
+        panel.add(button);
 
-                    int max_bombs = custom_columns * custom_rows - 1;
-                    int custom_bombs = input_handler.InputInteger("Enter number of bombs (minimum of 1, maximum of " + max_bombs + "):", 0, max_bombs);
+        button = new JButton("Hard");
+        button.addActionListener(this);
+        panel.add(button);
 
-                    game = new Game(custom_rows, custom_columns, custom_bombs);
-                }
+        this.frame.add(panel);
+        this.frame.pack();
+        this.frame.setVisible(true);
+        /*
+
+        String[] grid_options = {"EASY", "MEDIUM", "HARD", "CUSTOM"};
+        int grid_input = SelectGrid(grid_options);
+
+        Game game = null;
+        switch (grid_input) {
+            case 0 -> game = new Game(8, 8, 10); // EASY
+            case 1 -> game = new Game(16, 16, 40); // MEDIUM
+            case 2 -> game = new Game(16, 30, 99); // HARD
+            case 3 -> { // CUSTOM
+                int custom_rows = input_handler.InputInteger("Enter number of rows (minimum of 1): ", 1, null);
+                int custom_columns = input_handler.InputInteger("Enter number of columns (minimum of " + (custom_rows == 1 ? 2 : 1) + "): ", (custom_rows == 1 ? 2 : 1), null);
+
+                int max_bombs = custom_columns * custom_rows - 1;
+                int custom_bombs = input_handler.InputInteger("Enter number of bombs (minimum of 1, maximum of " + max_bombs + "):", 0, max_bombs);
+
+                game = new Game(custom_rows, custom_columns, custom_bombs);
             }
-            game.PlayGame(); // Begin game
         }
+        game.PlayGame(); // Begin game
+
+         */
+
 
     }
 
@@ -53,4 +96,6 @@ public class Setup {
         }
         return menu_input;
     }
+
+
 }
