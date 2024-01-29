@@ -1,23 +1,12 @@
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
 import java.util.LinkedList;
 import java.util.Random;
 
-public class Game implements ActionListener, ItemListener {
+public class Game {
     private final InputHandler input_handler = new InputHandler();
-    private final LinkedList<Cell> cells_flagged;
-
     private final Grid grid;
-    private final String[] action_options = {"Reveal", "Flag / Unflag", "Mark / Unmark"};
-    private String action_selected;
+    private final LinkedList<Cell> cells_flagged;
     private final int rows, columns, number_of_bombs;
     private boolean first_move, game_in_progress;
-
-    private final JFrame frame;
-    private final JPanel panel_game, panel_game_grid;
-    private final JLabel flag_count_label, cells_left_label;
-
 
     public Game(int rows, int columns, int number_of_bombs){
         this.rows = rows;
@@ -26,137 +15,8 @@ public class Game implements ActionListener, ItemListener {
 
         this.grid = new Grid(this.rows,this.columns);
         this.first_move = true;
-        this.game_in_progress = true;
         this.cells_flagged = new LinkedList<>();
-
-        this.action_selected = "Reveal";
-
-        this.frame = new JFrame();
-        this.panel_game = new JPanel();
-        this.panel_game_grid = new JPanel();
-        this.flag_count_label = new JLabel(" ");
-        this.cells_left_label = new JLabel(" ");
-
-
-        CreateGame();
     }
-
-    public void CreateGame(){
-        this.panel_game.setLayout(new BoxLayout(this.panel_game, BoxLayout.Y_AXIS));
-        this.panel_game_grid.setLayout(new GridLayout(this.rows, this.columns));
-
-        // Create grid of buttons
-        for(int y = 0; y < this.rows; y++){
-            for(int x = 0; x < this.columns; x++){
-                CellButton button = new CellButton("Cell", null, this.grid.GetCell(x,y));
-                button.addActionListener(this);
-                this.panel_game_grid.add(button);
-            }
-        }
-
-        // Radio buttons to select REVEAL, FLAG, MARK
-        JPanel action_panel = new JPanel();
-        ButtonGroup action_group = new ButtonGroup();
-
-        JRadioButton action_select = new JRadioButton(this.action_options[0], true);
-        action_select.addItemListener(this);
-        action_group.add(action_select);
-        action_panel.add(action_select);
-
-        action_select = new JRadioButton(this.action_options[1], false);
-        action_select.addItemListener(this);
-        action_group.add(action_select);
-        action_panel.add(action_select);
-
-        action_select = new JRadioButton(this.action_options[2], false);
-        action_select.addItemListener(this);
-        action_group.add(action_select);
-        action_panel.add(action_select);
-
-        this.cells_left_label.setText(this.grid.GetCellsRemaining() + " cells remaining.");
-        this.flag_count_label.setText("0 / " + this.number_of_bombs + " flags used.");
-
-        this.panel_game.add(action_panel);
-        this.panel_game.add(cells_left_label);
-        this.panel_game.add(flag_count_label);
-        this.panel_game.add(this.panel_game_grid);
-
-        this.frame.add(this.panel_game);
-
-        this.frame.pack();
-        this.frame.setVisible(true);
-    }
-
-    public void QuitGame(){
-        this.frame.dispatchEvent(new WindowEvent(this.frame, WindowEvent.WINDOW_CLOSING));
-    }
-
-    public void UpdateGrid(){
-        this.cells_left_label.setText(this.grid.GetCellsRemaining() + " cells remaining.");
-        this.flag_count_label.setText(this.cells_flagged.size() + " / " + this.number_of_bombs + " flags used.");
-
-        // Add button to quit/close the game when end
-        if(!this.game_in_progress){
-            JButton quit_game = new JButton("Quit Game");
-            quit_game.addActionListener(this);
-            this.panel_game.add(quit_game, 0);
-        }
-
-        // Rebuild grid
-        this.panel_game_grid.removeAll();
-
-        for(int y = 0; y < this.rows; y++){
-            for(int x = 0; x < this.columns; x++){
-                Cell cell = this.grid.GetCell(x,y);
-                if(!cell.GetIsRevealed()){ // Not yet selected -> Button
-                    CellButton button = new CellButton("Cell", cell.GetLabel(), cell);
-
-                    if(cell.GetIsFlagged()) button.setForeground(Color.GREEN); // Flag = Green
-                    else if(cell.GetIsMarked()) button.setForeground(Color.MAGENTA); // Mark = Magenta
-
-                    if(cell.GetIsBomb() && !this.game_in_progress) button.setText("X"); // Show bombs when game ends
-
-                    if(this.game_in_progress) button.addActionListener(this); // Only enable buttons during game
-                    this.panel_game_grid.add(button);
-
-                }
-                else{ // Revealed -> Label
-                    JLabel label = new JLabel();
-                    label.setText(cell.GetIsBomb() ? "X" : cell.GetLabel());
-                    label.setHorizontalAlignment(SwingConstants.CENTER);
-
-                    this.panel_game_grid.add(label);
-                }
-            }
-        }
-        this.frame.setVisible(true);
-        System.out.println("Updating");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        switch(e.getActionCommand()){
-            case "Cell" -> {
-                CellButton cell_button = (CellButton) e.getSource();
-                Cell cell_selected = cell_button.GetCell();
-
-                if(this.action_selected.equals(this.action_options[0])) RevealCell(cell_selected);
-                else if(this.action_selected.equals(this.action_options[1])) FlagCell(cell_selected);
-                else if(this.action_selected.equals(this.action_options[2])) MarkCell(cell_selected);
-                else System.out.println("Should not be here... CELL SELECT");
-
-                UpdateGrid();
-            }
-            case "Quit Game" -> QuitGame();
-        }
-
-    }
-    @Override
-    public void itemStateChanged(ItemEvent e) {
-        JRadioButton radio_button = (JRadioButton) e.getItem();
-        if(radio_button.isSelected()) this.action_selected = radio_button.getText(); // Change variable to currently selected
-    }
-
     public void PlayGame(){
 
         this.game_in_progress = true;
@@ -164,7 +24,7 @@ public class Game implements ActionListener, ItemListener {
         while(this.game_in_progress){
 
             // Display grid and stats
-            System.out.println(this.grid.GridString(true));
+            System.out.println(this.grid.GridString(this.game_in_progress));
             System.out.println("There are " + this.grid.GetCellsRemaining() + " cells remaining.");
             System.out.println(this.cells_flagged.size() + "/" + this.number_of_bombs + " cells flagged.");
 
@@ -181,7 +41,7 @@ public class Game implements ActionListener, ItemListener {
         }
 
         // Reveal grid and (in)correctly flagged cells
-        System.out.println(this.grid.GridString(false));
+        System.out.println(this.grid.GridString(this.game_in_progress));
 
         System.out.println("Correctly flagged:");
         for(Cell c : cells_flagged) if(c.GetIsBomb()) System.out.println("(" + c.GetX() + "," + c.GetY() + ")");
@@ -265,7 +125,6 @@ public class Game implements ActionListener, ItemListener {
             this.grid.RevealAdjacentCells(cell_selected);
             System.out.println("Bomb exploded. GAME OVER.");
             this.game_in_progress = false;
-            JOptionPane.showMessageDialog(null, "Bomb exploded. GAME OVER");
             return;
         }
 
@@ -277,7 +136,6 @@ public class Game implements ActionListener, ItemListener {
             if(this.grid.GetCellsRemaining() == this.number_of_bombs){
                 System.out.println("Ending game. ALL BOMBS FOUND.");
                 this.game_in_progress = false;
-                JOptionPane.showMessageDialog(null, "All bombs found. GAME OVER");
             }
             return;
         }
@@ -405,7 +263,4 @@ public class Game implements ActionListener, ItemListener {
             ++bombs_planted; // Update bomb counter
         }
     }
-
-
-
 }

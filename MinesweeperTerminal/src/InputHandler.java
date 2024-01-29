@@ -3,7 +3,7 @@ import java.util.Scanner;
 
 public class InputHandler {
 
-    private final Scanner reader;
+    private Scanner reader;
     public InputHandler(){
         this.reader = new Scanner(System.in);
     }
