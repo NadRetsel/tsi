@@ -5,16 +5,19 @@ import java.util.LinkedList;
 import java.util.Random;
 
 public class Game implements ActionListener, ItemListener {
-    private final JFrame frame;
-    private final JPanel panel_game, panel_game_grid;
-    private final JLabel flag_count_label;
     private final InputHandler input_handler = new InputHandler();
-    private final String[] action_options = {"Reveal", "Flag / Unflag", "Mark / Unmark"};
-    private final Grid grid;
     private final LinkedList<Cell> cells_flagged;
+
+    private final Grid grid;
+    private final String[] action_options = {"Reveal", "Flag / Unflag", "Mark / Unmark"};
+    private String action_selected;
     private final int rows, columns, number_of_bombs;
     private boolean first_move, game_in_progress;
-    private String action_selected;
+
+    private final JFrame frame;
+    private final JPanel panel_game, panel_game_grid;
+    private final JLabel flag_count_label, cells_left_label;
+
 
     public Game(int rows, int columns, int number_of_bombs){
         this.rows = rows;
@@ -32,6 +35,8 @@ public class Game implements ActionListener, ItemListener {
         this.panel_game = new JPanel();
         this.panel_game_grid = new JPanel();
         this.flag_count_label = new JLabel(" ");
+        this.cells_left_label = new JLabel(" ");
+
 
         CreateGame();
     }
@@ -68,10 +73,11 @@ public class Game implements ActionListener, ItemListener {
         action_group.add(action_select);
         action_panel.add(action_select);
 
-
+        this.cells_left_label.setText(this.grid.GetCellsRemaining() + " cells remaining.");
         this.flag_count_label.setText("0 / " + this.number_of_bombs + " flags used.");
 
         this.panel_game.add(action_panel);
+        this.panel_game.add(cells_left_label);
         this.panel_game.add(flag_count_label);
         this.panel_game.add(this.panel_game_grid);
 
@@ -86,6 +92,7 @@ public class Game implements ActionListener, ItemListener {
     }
 
     public void UpdateGrid(){
+        this.cells_left_label.setText(this.grid.GetCellsRemaining() + " cells remaining.");
         this.flag_count_label.setText(this.cells_flagged.size() + " / " + this.number_of_bombs + " flags used.");
 
         // Add button to quit/close the game when end

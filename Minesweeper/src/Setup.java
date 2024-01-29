@@ -25,34 +25,6 @@ public class Setup extends JFrame implements ActionListener {
         SetupGame();
 
     }
-    @Override
-    public void actionPerformed(ActionEvent a) {
-        String difficulty = a.getActionCommand();
-        if(difficulty.equals(grid_options[0])) new Game(8,8,10); // Easy
-        if(difficulty.equals(grid_options[1])) new Game(16,16, 40); // Medium
-        if(difficulty.equals(grid_options[2])) new Game(16, 30, 99); // Hard
-
-        if(difficulty.equals(grid_options[3])){ // Custom
-            try{
-                int rows_num = Integer.parseInt(this.rows_input.getText());
-                int columns_num = Integer.parseInt(this.columns_input.getText());
-                int bombs_num = Integer.parseInt(this.bombs_input.getText());
-
-                int bombs_max = rows_num*columns_num - 1;
-
-                this.error_message.setText("Generating grid...");
-
-                // Check all inputs are valid
-                if(rows_num == 1 && columns_num == 1 || (rows_num < 1 || columns_num < 1)) this.error_message.setText("Minimum grid size is 1x2 or 2x1.");
-                else if(bombs_num < 1) this.error_message.setText("Minimum bomb count size is 1.");
-                else if(bombs_num > bombs_max) this.error_message.setText("Maximum bomb count size is " + bombs_max +".");
-                else new Game(rows_num, columns_num, bombs_num);
-            }
-            catch(Exception e) {
-                this.error_message.setText("Inputs must be integers.");
-            }
-        }
-    }
 
 
     // Let the user select a grid to play
@@ -122,6 +94,36 @@ public class Setup extends JFrame implements ActionListener {
 
 
     }
+
+    @Override
+    public void actionPerformed(ActionEvent a) {
+        String difficulty = a.getActionCommand();
+        if(difficulty.equals(grid_options[0])) new Game(8,8,10); // Easy
+        if(difficulty.equals(grid_options[1])) new Game(16,16, 40); // Medium
+        if(difficulty.equals(grid_options[2])) new Game(16, 30, 99); // Hard
+
+        if(difficulty.equals(grid_options[3])){ // Custom
+            try{
+                int rows_num = Integer.parseInt(this.rows_input.getText());
+                int columns_num = Integer.parseInt(this.columns_input.getText());
+                int bombs_num = Integer.parseInt(this.bombs_input.getText());
+
+                int bombs_max = rows_num*columns_num - 1;
+
+                this.error_message.setText("Generating grid...");
+
+                // Check all inputs are valid
+                if(rows_num == 1 && columns_num == 1 || (rows_num < 1 || columns_num < 1)) this.error_message.setText("Minimum grid size is 1x2 or 2x1.");
+                else if(bombs_num < 1) this.error_message.setText("Minimum bomb count size is 1.");
+                else if(bombs_num > bombs_max) this.error_message.setText("Maximum bomb count size is " + bombs_max +".");
+                else new Game(rows_num, columns_num, bombs_num);
+            }
+            catch(Exception e) {
+                this.error_message.setText("Inputs must be integers.");
+            }
+        }
+    }
+
 
     public int SelectGrid(String[] menu_options){
         int menu_input = -1;
